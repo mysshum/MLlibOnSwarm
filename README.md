@@ -36,7 +36,7 @@ As an example, we will setup MLlibOnSwarm on a freshly created DigitalOcean Drop
   cd MLlibOnSwarm
   ```
 
-* Set up the environment variables of the Controller. In the shell script <code>env_vars.sh</code>, change the variable <code>SPARK_ON_SWARM_DIR</code> variable to the full path of <code>\<MLlibOnSwarmLocation\></code>. Source the variables:
+* Set up the environment variables of this Droplet. In the shell script <code>env_vars.sh</code>, change the variable <code>SPARK_ON_SWARM_DIR</code> variable to the full path of <code>\<MLlibOnSwarmLocation\></code>. Source the variables:
   ```
   source env_vars.sh
   ```
