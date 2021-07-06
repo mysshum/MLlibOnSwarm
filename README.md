@@ -1,14 +1,24 @@
 # MLlibOnSwarm
 
-Infrastructure for running Spark MLlib on Docker Swarm on Digitalocean
+Integrated pipelining for running Spark MLlib on Docker Swarm on Digitalocean
 
 # Introduction
 
-MLlibOnSwarm allows users to run Spark code in a containerised manner on a cloud by bringing together (Py)Spark MLlib, Docker and DigitalOcean via docker-machine. A lot of this came out of customising the codebase found at,
+MLlibOnSwarm allows users to run Spark code in a containerised and reproducible manner on a cloud by bringing together (Py)Spark MLlib, Docker and DigitalOcean via docker-machine. This project came out of play around with the codebase found at,
 
 https://github.com/testdrivenio/spark-docker-swarm
 
-by M. Herman for my own needs. Citations to other parts used in this project can be found in *Citations* below, and in the header of the relevant source code. This is intended to be a proof-of-concept: the software is currently not production-grade, nor is it supported by me in any way.
+by M. Herman. Apart from documenting my learning, some additional functionalities are added for my own curiosity and use.
+
+* The controlling machine (e.g. the machine from which one calls the application and controls the Spark cluster) is intended to also be a node hosted in the same cloud as the cluster. To my mind, this has the following benefits for the individual user aside from the usual advantages of cloud computing.
+  * The hardware and software at the entrypoint of the pipeline can be standardised and replicated. (From painful experiences, I decided to separate machines critical for my work with my personal laptop as much as possible to avoid kernel/drivers/package management/dependency hell.) 
+  * Hosting the main machine on cloud also allows one to leverage the cloud's storage services to streamline the practice of backing up.
+  * It is sometimes faster to use the cloud's internet connection to download large files, and it is definitely faster for the main node and cluster to communicate such files within the cloud's local network. 
+  * One can also easily scale up the computing power of the non-cluster parts (such as for plotting results returned by the cluster, which may be heavy but undistributable without significant dev work).
+* The Swarm cluster has its own private Docker image repository. 
+  * This is necessary should the cluster be scaled across networks and clouds. This is more of a point of curiosity at the moment, but it may be built upon in the future.
+
+Citations to other parts used in this project can be found in *Citations* below, and in the header of the relevant source code. This is intended to be a proof-of-concept: the software is currently not production-grade, nor is it supported by me in any way.
 
 # Example
 
@@ -16,7 +26,7 @@ by M. Herman for my own needs. Citations to other parts used in this project can
 
 As an example, we will setup MLlibOnSwarm on a freshly created DigitalOcean Droplet (virtual machine) and run the linear regression application in Apps/SparkML/LinearRegression.
 
-* Create a [DigitalOcean](www.digitalocean.com) account. Obtain an [API token](https://docs.digitalocean.com/reference/api/create-personal-access-token/), say <code>\<API_TOKEN\></code>. Spin up a Droplet: we will refer to this virtual machine as the "Controller".  *The code has been tested on a Droplet with 8 Gb of RAM and 4 vCPU's running Debian 9.* Start a bash session to control this machine (for example using ssh).
+* Create a [DigitalOcean](www.digitalocean.com) account. Obtain an [API token](https://docs.digitalocean.com/reference/api/create-personal-access-token/), say <code>\<API_TOKEN\></code>. Spin up a Droplet: this will be the machine used to control the swarm.  *The code has been tested on a Droplet with 8 Gb of RAM and 4 vCPU's running Debian 9.* Start a bash session to control this machine (for example using ssh).
 
 * Choose a location to install MLlibOnSwarm, say <code>\<MLlibOnSwarmLocation\></code>. Download MLlibOnSwarm. It is recommended to use git for this:
   ```
@@ -54,7 +64,7 @@ As an example, we will setup MLlibOnSwarm on a freshly created DigitalOcean Drop
   ```
   The flag <code>-u</code> creates the nodes Droplets on DigitalOcean, and the flag <code>-s</code> initialises Swarm mode over the created nodes.
   
-* Create the Swarm's registry. This registry is created on the Spark master node to which the Spark image is pushed and from which Spark worker nodes pull this image. The registry is created using:
+* Create a private Swarm registry. This registry is created on the Spark master node to which the Spark image is pushed and from which Spark worker nodes pull this image. The registry is created using:
   ```
   ./Core/Setup/swarm_registry_util.sh
   ```
