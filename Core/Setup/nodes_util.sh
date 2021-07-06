@@ -7,21 +7,31 @@
 # This script currently takes global parameters from Config/SwarmConfig.sh so, consequently, is not intended to be used 
 # as a standalone tool. 
 #
+# When -u is used, the first node is created separately and in a blocking way, to prevent race conditions for TLS certificates. See response of @oscar-martin in,
+# https://github.com/docker/machine/issues/3845
+#
 ########################################################################################################################
 
 project_dir=$SPARK_ON_SWARM_DIR
 source $project_dir/Core/Config/swarm_config.sh
 
+function _spin_up_node  {
+	node_label=$1
+	docker-machine create \
+		--driver digitalocean \
+		--digitalocean-access-token $do_key \
+		--engine-install-url "https://releases.rancher.com/install-docker/19.03.9.sh" \
+		--digitalocean-size $node_size \
+		--digitalocean-image $do_image \
+		$node_label
+}
+
 function spin_up_nodes {
     echo "Spinning up nodes."
-    for ((i=1;i<=num_nodes;i++)); do
-        docker-machine create \
-            --driver digitalocean \
-            --digitalocean-access-token $do_key \
-            --engine-install-url "https://releases.rancher.com/install-docker/19.03.9.sh" \
-            --digitalocean-size $node_size \
-            --digitalocean-image $do_image \
-            node-$i & pids[${i}]=$!
+    _spin_up_node node-1 & first_pid=$!
+    wait $first_pid
+    for ((i=2;i<=num_nodes;i++)); do
+	_spin_up_node node-$i & pids[${i-1}]=$!
     done
     for pid in ${pids[*]}; do
         wait $pid
