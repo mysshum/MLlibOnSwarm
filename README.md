@@ -11,10 +11,10 @@ https://github.com/testdrivenio/spark-docker-swarm
 by M. Herman. Apart from documenting my learning, some additional functionalities are added for my own curiosity and use.
 
 * The controlling machine (e.g. the machine from which one calls the application and controls the Spark cluster) is intended to also be a node hosted in the same cloud as the cluster. To my mind, this has the following benefits for the individual user aside from the usual advantages of cloud computing.
-  * The hardware and software at the entrypoint of the pipeline can be standardised and replicated. (From painful experiences, I decided to separate machines critical for my work with my personal laptop as much as possible to avoid kernel/drivers/package management/dependency hell.) 
+  * The controlling machine can be set up independently and separately from one's personal computer so as to avoid needlessly installing packages on one's personal computer in order to satisfy the requirements for running this project.
   * Hosting the main machine on cloud also allows one to leverage the cloud's storage services to streamline the practice of backing up.
-  * It is sometimes faster to use the cloud's internet connection to download large files, and it is definitely faster for the main node and cluster to communicate such files within the cloud's local network. 
-  * One can also easily scale up the computing power of the non-cluster parts (such as for plotting results returned by the cluster, which may be heavy but undistributable without significant dev work).
+  * It is sometimes faster to use the cloud's internet connection to download large files, and it is definitely faster for the controlling node and the cluster to communicate within the cloud's local network. 
+  * One can also easily scale up the computing power of the non-Spark cluster parts (such as for plotting results returned by the cluster, which may be heavy but undistributable without significant dev work).
 * The Swarm cluster has its own private Docker image repository. 
   * This is necessary should the cluster be scaled across networks and clouds. This is more of a point of curiosity at the moment, but it may be built upon in the future.
 
